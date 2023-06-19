@@ -1,0 +1,6 @@
+.idea/
+__pycache__/
+venv/
+flask_roleman.egg-info/
+build/
+dist/
