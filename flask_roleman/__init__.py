@@ -1,7 +1,9 @@
-# t.me/elhasnaouymed
 from flask import abort
 from flask_login import current_user
-from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy, model as _model
+
+
+_Role: _model.Model | None = None  # holds the Role Model class to be accessed from ManMixing
 
 
 class RoleMan:
@@ -22,8 +24,6 @@ class RoleMan:
         self._user_table_class_name = user_table_class_name
         self.UserRole = None
         self.Role = None
-        self.RoelManMixing = None
-        self._init_role_man_mixing()
 
         # check whether to initialize now or not
         if db and (isinstance(db, _SQLAlchemy) or issubclass(type(db), _SQLAlchemy)):
@@ -74,43 +74,37 @@ class RoleMan:
                 return f'<Role "{self.name}">'
 
         self.Role = Role
+        global _Role
+        _Role = Role
 
-    def _init_role_man_mixing(self):
-        """
-        This method will create the Mixing class for User table to inherit from
-        :return: None
-        """
-        master = self
 
-        class RoleManMixing:
-            roles = None  # just to not get the AttributeError from User, when accessing the relationship, before initializing this class
+class RoleManMixing:
+    roles = None  # just to not get the AttributeError from User, when accessing the relationship, before initializing this class
 
-            def has_role(self, role):
-                if isinstance(role, str):
-                    role = master.Role.query.filter_by(name=role.lower()).first()
-                #
-                if not role:
+    def has_role(self, role):
+        if isinstance(role, str):
+            role = _Role.query.filter_by(name=role.lower()).first()
+        #
+        if not role:
+            return False
+        #
+        return self in role.users
+
+    def has_roles(self, *roles_seq):
+        def _has_one_role(*_rls):
+            # checks if the user has at least one role of many (OR Gate)
+            for rl in _rls:
+                if self.has_role(rl):
+                    return True
+            return False
+
+        for role_value in roles_seq:
+            if isinstance(role_value, (list, tuple, set)):
+                if not _has_one_role(*role_value):
                     return False
-                #
-                return self in role.users
-
-            def has_roles(self, *roles_seq):
-                def _has_one_role(*_rls):
-                    # checks if the user has at least one role of many (OR Gate)
-                    for rl in _rls:
-                        if self.has_role(rl):
-                            return True
-                    return False
-
-                for role_value in roles_seq:
-                    if isinstance(role_value, (list, tuple, set)):
-                        if not _has_one_role(*role_value):
-                            return False
-                    elif not self.has_role(role_value):
-                        return False
-                return True
-
-        self.RoelManMixing = RoleManMixing
+            elif not self.has_role(role_value):
+                return False
+        return True
 
 
 def roles_required(*roles):

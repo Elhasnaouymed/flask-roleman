@@ -57,12 +57,14 @@ You have to specify **user_table_name** and **user_table_class_name** arguments 
 
 ### Mixing
 
-To use **RoleMan** in your project, you need to have the **User Model** inherit from **roleman.RoleManMixing**;
+To use **RoleMan** in your project, you need to have the **User Model** inherit from **RoleManMixing**;
 
 Example:
 
 ```python
-class User(db.Model, roleman.RoleManMixing):
+from flask_roleman import RoleManMixing
+
+class User(db.Model, RoleManMixing):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
