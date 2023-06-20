@@ -28,7 +28,7 @@ Or you can download & compile & install it from source:
 1. `git clone https://github.com/Elhasnaouymed/flask-roleman.git`
 2. `cd flask-roleman`
 3. `python setup.py sdist`
-4. `pip install dist/flask-roleman-0.0.1.tar.gz`
+4. `pip install dist/flask-roleman-*.tar.gz`
 
 > Note: Install from source will **only** work inside a Virtual Environment
 
@@ -51,7 +51,7 @@ roleman.init_database(db, user_table_name='user', user_table_class_name='User')
 ```
 
 You have to specify **user_table_name** and **user_table_class_name** arguments if the User Model class name is not
-"User" and its `__tablename__` is not 'user'.
+"User" and its `__tablename__` is not "user".
 
 ## Usage
 
@@ -62,7 +62,7 @@ To use **RoleMan** in your project, you need to have the **User Model** inherit 
 Example:
 
 ```python
-class User(db.Model, roleman.RoelManMixing):
+class User(db.Model, roleman.RoleManMixing):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
