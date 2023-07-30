@@ -1,3 +1,4 @@
+import functools
 from flask import abort
 from flask_login import current_user
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy, model as _model
@@ -115,6 +116,7 @@ def roles_required(*roles):
     """
 
     def holder(action):
+        @functools.wraps(action)
         def wrapper(*args, **kwargs):
             nonlocal roles
             #
