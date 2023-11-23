@@ -3,7 +3,7 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-VERSION = '0.0.3'
+VERSION = '0.0.5'
 DESCRIPTION = 'Flask Extension to add the Authorization functionality to your apps.'
 
 with open('README.md', 'r', encoding='utf-8') as f:
