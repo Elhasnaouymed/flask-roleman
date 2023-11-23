@@ -66,10 +66,12 @@ class RoleMan:
             __tablename__ = self.ROLE_TABLE_NAME
             id = db.Column(db.Integer, primary_key=True)
             name = db.Column(db.String, nullable=False, unique=True)
+            description = db.Column(db.String)
             users = db.relationship(self._user_table_class_name, secondary=self.SECONDARY_TABLE_NAME, backref='roles')
 
-            def __init__(self, name: str):
+            def __init__(self, name: str, description: str = None):
                 self.name = name.lower()
+                self.description = description
 
             def __repr__(self):
                 return f'<Role "{self.name}">'
