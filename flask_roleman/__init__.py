@@ -120,7 +120,7 @@ def roles_required(*roles):
         def wrapper(*args, **kwargs):
             nonlocal roles
             #
-            if current_user.has_roles(*roles):
+            if current_user.is_authenticated and current_user.has_roles(*roles):
                 return action(*args, **kwargs)
             #
             return abort(401)
