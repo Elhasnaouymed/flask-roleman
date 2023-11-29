@@ -8,7 +8,7 @@ from .user_mixing import UserModelMixing
 from .group_mixing import GroupModelMixing
 from .role_mixing import RoleModelMixing
 
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 __all__ = ('roles_required', 'RoleMan', 'UserModelMixing', 'GroupModelMixing', 'RoleModelMixing')
 
 
