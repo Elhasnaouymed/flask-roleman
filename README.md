@@ -14,7 +14,7 @@ and Each Group can have Roles, you can define your Groups Model and Roles Model,
 
 ## Live Example
 
-[**Jump to live example**](#live-example)
+[**Jump to live example**](#the-live-example)
 
 ## Install
 
@@ -152,7 +152,7 @@ def admin_page():
 ```
 
 
-# Live Example
+# The Live Example
 
 **In This example, the user will always get 401 error when accessing `/admin`,
 until he logs in with a user that has the 'admin' role in one of his groups**
