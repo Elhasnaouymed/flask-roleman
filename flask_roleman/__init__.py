@@ -58,7 +58,7 @@ class RoleMan:
         )
 
 
-def roles_required(*roles: typing.Tuple[typing.Union[typing.List[str], str]]):
+def roles_required(*roles):
     """
     This decorator is used before routes, to ensure that the current_user has the authorization to access that route
     """
