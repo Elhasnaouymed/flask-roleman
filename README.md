@@ -12,6 +12,10 @@ and Each Group can have Roles, you can define your Groups Model and Roles Model,
 - **License**: Open Source Under **GNU GPL v2**
 - **Author**: Mohamed El-Hasnaouy `codeberg.org/elhasnaouymed`
 
+## Live Example
+
+[**Jump to live example**](#live-example)
+
 ## Install
 
 #### Using PIP
@@ -112,6 +116,12 @@ or just a role name as string like `'admin'`
 > 
 > In other words: the program performs *AND* operator over the method arguments, and *OR* over the list values.
 
+
+> **Notes**
+>> You should assign Roles to Groups, and Groups to the Users.
+> 
+>> The user get Authorized only if he has at least one of the Requested roles bound to one of his Groups.   
+
 ## Static Authorizing
 
 Whenever you want to **Require a role** from User, use this Decorator:
@@ -139,4 +149,64 @@ def admin_page():
     if not current_user.has_roles('admin'):
         return abort(401)
     return render_template('admin.html')
+```
+
+
+# Live Example
+
+**In This example, the user will always get 401 error when accessing `/admin`,
+until he logs in with a user that has the 'admin' role in one of his groups**
+
+```python
+from flask import Flask
+from flask_login import LoginManager
+from flask_roleman import RoleMan, UserModelMixing, GroupModelMixing, RoleModelMixing, roles_required
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = '5d19362626f3290221a2b37f0a5038d07e5aa0e18a9967ffcbedc69eaee4cce9'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.db'
+db = SQLAlchemy()
+login_manager = LoginManager(app)
+
+
+@login_manager.user_loader
+def user_loader(id: int):
+    return User.query.get(id)
+
+
+class User(db.Model, UserModelMixing):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String, nullable=False, unique=True)
+    password = db.Column(db.String, nullable=False)
+
+
+class Group(db.Model, GroupModelMixing):
+    __tablename__ = 'group'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    users = db.relationship('User', secondary=RoleMan.SECONDARY_USER_GROUP_TABLE_NAME, backref="groups")
+    roles = db.relationship('Role', secondary=RoleMan.SECONDARY_GROUP_ROLE_TABLE_NAME, backref="groups")
+
+
+class Role(db.Model, RoleModelMixing):
+    __tablename__ = 'role'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+
+
+@app.route('/')
+def home():
+    return 'Hello World! from Home'
+
+@app.route('/admin')
+@roles_required('admin')
+def admin():
+    return 'Admin Page !!!'
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 ```
