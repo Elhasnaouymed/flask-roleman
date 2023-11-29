@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user
 
 import functools
+import typing
 
 from .user_mixing import UserModelMixing
 from .group_mixing import GroupModelMixing
@@ -25,9 +26,9 @@ class RoleMan:
         self._db = db
         self._initialized = False
         if db:
-            self.init_app(db, create_secondaries=create_secondaries)
+            self.init_db(db, create_secondaries=create_secondaries)
 
-    def init_app(self, db: SQLAlchemy, create_secondaries=True):
+    def init_db(self, db: SQLAlchemy, create_secondaries=True):
         if self._initialized:
             raise RuntimeError('UserPrivileges is already initialized !!')
         _m = 'You Forget to Inherit {}! or you Initialized {self.__class__.__name__} before importing your db Models !'
@@ -57,7 +58,7 @@ class RoleMan:
         )
 
 
-def roles_required(*roles):
+def roles_required(*roles: typing.Tuple[typing.Union[typing.List[str], str]]):
     """
     This decorator is used before routes, to ensure that the current_user has the authorization to access that route
     """

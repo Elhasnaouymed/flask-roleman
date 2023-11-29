@@ -1,15 +1,16 @@
 
-> This Software is in **Alpha Version**, you should expect major changes from time to time !
+> This Software is in **Beta Version**, Please place an issue or contact me if you found a Bug !
 
 # Flask-Roleman
 
-**flask-roleman** is a very Simple and Minimal Flask Extension to help you manage User Authorizations using *Roles*.
+**flask-roleman** is a flask extension for User Authorizations, Users can have Groups, 
+and Each Group can have Roles, you can define your Groups Model and Roles Model, as well as Users Model.
 
 ### About
 
-- **Dependencies**: `flask-login`, `flask-sqlalchemy`
+- **Dependencies**: `flask` `flask-login`, `flask-sqlalchemy`
 - **License**: Open Source Under **GNU GPL v2**
-- **Author**: Mohamed El-Hasnaouy `github/elhasnaouymed`
+- **Author**: Mohamed El-Hasnaouy `codeberg.org/elhasnaouymed`
 
 ## Install
 
@@ -25,12 +26,12 @@ pip install flask-roleman
 
 Or you can download & compile & install it from source:
 
-1. `git clone https://github.com/Elhasnaouymed/flask-roleman.git`
+1. `git clone https://codeberg.org/Elhasnaouymed/flask-roleman.git`
 2. `cd flask-roleman`
 3. `python setup.py sdist`
 4. `pip install dist/flask-roleman-*.tar.gz`
 
-> Note: Install from source will **only** work inside a Virtual Environment
+> Note: on most GNU/Linux distributions, You can install **only** inside a Virtual Environment (see [PEP 0668](https://peps.python.org/pep-0668/))
 
 ## Initialization
 
@@ -38,43 +39,82 @@ As most Extensions of Flask, you first import and create the Main Instance, then
 or after:
 
 ```python
-from flask_roleman import RoleMan
-from flask_sqlalchemy import SQLAlchemy
+...
 
 db = SQLAlchemy()
 roleman = RoleMan()
 
-app = Flask()
+...
 
-db.init_app(app)
-roleman.init_database(db, user_table_name='user', user_table_class_name='User')
+roleman.init_db(db, create_secondaries=True)
+
+...
 ```
 
-You have to specify **user_table_name** and **user_table_class_name** arguments if the User Model class name is not
-"User" and its `__tablename__` is not "user".
+But before initialization, you **must** define the three models to inherit from their mixing,
+as shown in the [next section](#usage).
 
-## Usage
+also you should initialize before `db.init_app()` to allow secondary tables to be created.
 
 ### Mixing
 
-To use **RoleMan** in your project, you need to have the **User Model** inherit from **RoleManMixing**;
+To use **RoleMan** in your project, you need to have:
+ - **User Model** that inherits from `flask_roleman.UserModelMixing`.
+ - **Group Model** that inherits from `flask_roleman.GroupModelMixing`.
+ - **Role Model** that inherits from `flask_roleman.RoleModelMixing`.
 
-Example:
+> Group Model must have:
+> - A String column `name`.
+> - `users`: *many-to-many* relationship to the Users model, with `secondary=RoleMan.SECONDARY_USER_GROUP_TABLE_NAME` and `backref="groups"`.
+> - `roles`: *many-to-many* relationship to the Roles model, with `secondary=RoleMan.SECONDARY_GROUP_ROLE_TABLE_NAME` and `backref="groups"`.
+
+> Role Model must have:
+> - A String column `name`.
+
+### Minimal Example
+Minimal Example of defining the three necessary Models with their Inheritance:
 
 ```python
-from flask_roleman import RoleManMixing
+from flask_roleman import RoleMan, UserModelMixing, GroupModelMixing, RoleModelMixing
 
-class User(db.Model, RoleManMixing):
+class User(db.Model, UserModelMixing):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
     ...
+
+class Group(db.Model, GroupModelMixing):
+    __tablename__ = 'group'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    users = db.relationship('User', secondary=RoleMan.SECONDARY_USER_GROUP_TABLE_NAME, backref="groups")
+    roles = db.relationship('Role', secondary=RoleMan.SECONDARY_GROUP_ROLE_TABLE_NAME, backref="groups")
+    ...
+    
+class Role(db.Model, RoleModelMixing):
+    __tablename__ = 'role'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    ...
 ```
 
-### Static Authorizing
+# Usage
 
-Then... Whenever you want to **Require a role** from User, use this Decorator:
+There are two ways to use this tool, [One](#static-authorizing) by decorating the route you want to protect, 
+[Two](#dynamic-authorizing) is by using `.has_roles()` method over a User or a Group
+
+Both methods take variable length argument `*roles=Tuple[Union[List[str], str]]`, you can pass a list of roles like `['admin', 'manager', 'chief']`
+or just a role name as string like `'admin'`
+
+> * by passing a list, the User must have at least one of the Roles
+> * by passing a string, the User must have that Role
+> 
+> In other words: the program performs *AND* operator over the method arguments, and *OR* over the list values.
+
+## Static Authorizing
+
+Whenever you want to **Require a role** from User, use this Decorator:
 
 ```python
 from flask_roleman import roles_required
@@ -86,7 +126,7 @@ def admin_page():
     return render_template('admin.html')
 ```
 
-### Dynamic Authorizing
+## Dynamic Authorizing
 
 Or you can check dynamically using `current_user.has_roles`:
 
@@ -100,32 +140,3 @@ def admin_page():
         return abort(401)
     return render_template('admin.html')
 ```
-
-## Control
-
-### Advanced Checking
-
- Both `role_required` and `has_roles` checks if the `current_user` has the input roles;
-
-- `role_required` allows the Request to continue if `True`, Otherwise rises `401` **abort error code**  
-- `has_roles` returns `True` or `False`
-
-
-`*roles` argument is `Tuple[Union[List[str], str]]`, 
-which means it can take Both Strings and/or Lists of Strings as arguments, 
-Presenting the names of the **Roles** a User Must have to gain access.
-
-> For the User to be **Authorized** it must have all the string Roles and at least one Role of each list provided.
-
-### Table Names
-
-**flask-roleman** Creates two tables when Initialized, **role** and **user_role**, 
-You can change their names using this code but only before Initialization of the `RoleMan` instance:
-
-```python
-from flask_roleman import RoleMan
-
-RoleMan.ROLE_TABLE_NAME = "any_role_name"
-RoleMan.SECONDARY_TABLE_NAME = "any_secondary_name"
-```
-> When Changing these table names, the whole database will need to be **Recreated** or **Migrated** for the changes to take effect !
