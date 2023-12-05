@@ -9,7 +9,7 @@ from .user_mixing import UserModelMixing
 from .group_mixing import GroupModelMixing
 from .role_mixing import RoleModelMixing
 
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 __all__ = ('roles_required', 'RoleMan', 'UserModelMixing', 'GroupModelMixing', 'RoleModelMixing')
 
 
@@ -47,14 +47,14 @@ class RoleMan:
     def create_secondaries(self):
         self._user_group_secondary = self._db.Table(
             self.SECONDARY_USER_GROUP_TABLE_NAME,
-            self._db.Column('user_id', self._db.Integer(), self._db.ForeignKey(f'{self.UserModel.__tablename__}.id')),
-            self._db.Column('group_id', self._db.Integer(), self._db.ForeignKey(f'{self.GroupModel.__tablename__}.id')),
+            self._db.Column('user_id', self._db.Integer(), self._db.ForeignKey(f'{self.UserModel.__tablename__}.id', on_delete='cascade')),
+            self._db.Column('group_id', self._db.Integer(), self._db.ForeignKey(f'{self.GroupModel.__tablename__}.id', on_delete='cascade')),
         )
         #
         self._group_role_secondary = self._db.Table(
             self.SECONDARY_GROUP_ROLE_TABLE_NAME,
-            self._db.Column('group_id', self._db.Integer(), self._db.ForeignKey(f'{self.GroupModel.__tablename__}.id')),
-            self._db.Column('role_id', self._db.Integer(), self._db.ForeignKey(f'{self.RoleModel.__tablename__}.id')),
+            self._db.Column('group_id', self._db.Integer(), self._db.ForeignKey(f'{self.GroupModel.__tablename__}.id', on_delete='cascade')),
+            self._db.Column('role_id', self._db.Integer(), self._db.ForeignKey(f'{self.RoleModel.__tablename__}.id', on_delete='cascade')),
         )
 
 

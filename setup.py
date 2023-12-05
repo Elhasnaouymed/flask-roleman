@@ -3,7 +3,7 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-VERSION = '1.0.0'
+VERSION = '1.0.2'
 DESCRIPTION = 'Flask Extension for User Authorizations, Users can have Groups, and Each Group can have Roles, more control and easy to use.'
 
 with open('README.md', 'r', encoding='utf-8') as f:
