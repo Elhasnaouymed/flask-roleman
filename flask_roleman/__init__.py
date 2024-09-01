@@ -9,7 +9,7 @@ from .user_mixing import UserModelMixing
 from .group_mixing import GroupModelMixing
 from .role_mixing import RoleModelMixing
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __all__ = ('roles_required', 'RoleMan', 'UserModelMixing', 'GroupModelMixing', 'RoleModelMixing')
 
 
@@ -30,14 +30,14 @@ class RoleMan:
 
     def init_db(self, db: SQLAlchemy, create_secondaries=True):
         if self._initialized:
-            raise RuntimeError('UserPrivileges is already initialized !!')
-        _m = 'You Forget to Inherit {}! or you Initialized {self.__class__.__name__} before importing your db Models !'
+            raise RuntimeError('RoleMan is already initialized !!')
+        _m = 'You Forget to Inherit from {}! or you Initialized RoleMan before importing your db Models !'
         if self.UserModel is None:
-            raise TypeError(_m.format('UserModel'))
+            raise TypeError(_m.format('UserModelMixing'))
         if self.GroupModel is None:
-            raise TypeError(_m.format('GroupModel'))
+            raise TypeError(_m.format('GroupModelMixing'))
         if self.RoleModel is None:
-            raise TypeError(_m.format('RoleModel'))
+            raise TypeError(_m.format('RoleModelMixing'))
 
         self._db = db
         if create_secondaries:

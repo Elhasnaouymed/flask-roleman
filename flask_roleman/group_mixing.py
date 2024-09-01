@@ -3,8 +3,8 @@ class GroupModelMixing:
     """
     The inherited class from this one must have:
         - name: String column
-        - users: many-to-many relationship to the Users model, pass UserPrivileges.SECONDARY_USER_GROUP_TABLE_NAME to the `secondary=` argument
-        - roles: many-to-many relationship to the Roles model, pass UserPrivileges.SECONDARY_GROUP_ROLE_TABLE_NAME to the `secondary=` argument
+        - users: many-to-many relationship to the Users model, pass RoleMan.SECONDARY_USER_GROUP_TABLE_NAME to the `secondary=` argument
+        - roles: many-to-many relationship to the Roles model, pass RoleMan.SECONDARY_GROUP_ROLE_TABLE_NAME to the `secondary=` argument
     """
     roles: list = None
 
